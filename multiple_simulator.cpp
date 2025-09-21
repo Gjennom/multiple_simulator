@@ -5,27 +5,33 @@ int width = 1000;
 std::vector<>
 
 int main(){
-	// Loading resources
+	// Loading resources;
+	// Multiple simulator front UI
 	Image mult_front = LoadImage("resources/multisim_main.png");
 	Texture2D mult_texture = LoadTextureFromImage(mult_front);
 	UnloadImage(mult_front);
 
+	// Agilent DMM ui
 	Image agilent_front = LoadImage("resources/agilent_front.png");
 	Texture2D agilent_texture = LoadTextureFromImage(agilent_front);
 	UnloadImage(agilent_front);
 
+	// Agilent component
 	Image agilent_component = LoadImage("resources/agilent_component.png");
 	Texture2D agilent_component_texture = LoadTextureFromImage(agilent_component);
 	UnloadImage(agilent_component);
 
+	// Multiple Simulator backround (world)
 	Image background = LoadImage("resources/multisim_background.png");
 	Texture2D background_texture = LoadTextureFromImage(background);
 	UnloadImage(background);
 
+	// Resistor component sprite
 	Image resistor = LoadImage("resources/resistor.png");
 	Texture2D resistor_texture = LoadTextureFromImage(resistor);
 	UnloadImage(resistor);
 
+	// Power Source sprite
 	Image source = LoadImage("resources/source.png");
 	Texture2D source_texture = LoadTextureFromImage(source);
 	UnloadImage(source);
