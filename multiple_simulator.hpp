@@ -1,6 +1,8 @@
 #include <iostream>
 #include "raylib.h"
 #include <fstream>
+#include <vector>
+#include <unordered_map>
 
 /*	This program will use raylib to implement circuits in a 
  *	was that looks exactly like multisim.
@@ -102,6 +104,16 @@
  *
  */
 
+struct pop_up{
+	Texture2D & texture;
+	int x;
+	int y;
+};
 
+bool is_cursor_in_world();
 
+void get_input(Camera2D camera);
 
+void draw();
+
+void load_textures();
