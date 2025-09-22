@@ -1,5 +1,9 @@
+#pragma once
+
 #include <iostream>
 #include "raylib.h"
+#include "rlgl.h"
+#include "raymath.h"
 #include <fstream>
 #include <vector>
 #include <unordered_map>
@@ -104,16 +108,58 @@
  *
  */
 
-struct pop_up{
-	Texture2D & texture;
-	int x;
-	int y;
+/*
+int resistor_width = 60;
+int resistor_height = 12;
+int source_width = 36;
+int source_height = 48;
+int node_radius = 5;
+int connector_width = 2;
+*/
+
+enum Orientation{
+	NORTH,
+	SOUTH,
+	EAST,
+	WEST
 };
 
-bool is_cursor_in_world();
+struct Resistor{
+	int x; // center x of sprite
+	int y; // center y of sprite
+	Orientation orientation; 
+	float resistance;
+};
 
-void get_input(Camera2D camera);
+struct Source{
+	int x; // center x of sprite
+	int y; // center y of sprite
+	Orientation orientation; // direction of positive terminal
+};
 
-void draw();
+struct Node{
+	int x;
+	int y;
+	float voltage;
+};
 
-void load_textures();
+struct Connection{
+	int start_x;
+	int end_x;
+	int start_y;
+	int end_y;
+	float current;
+};
+
+struct Region{
+	int x_top;
+	int x_bottom;
+	int y_top;
+	int y_bottom;
+};
+
+
+bool is_cursor_in_x(const Region & region);
+
+void get_input(Camera2D & camera, const std::unordered_map<std::string, Region>& Regions);
+
