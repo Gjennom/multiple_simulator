@@ -135,6 +135,7 @@ struct Source{
 	int x; // center x of sprite
 	int y; // center y of sprite
 	Orientation orientation; // direction of positive terminal
+	float voltage;
 };
 
 struct Node{
@@ -158,8 +159,15 @@ struct Region{
 	int y_bottom;
 };
 
+struct Region_should_darken{
+        bool value = false;
+        int x_top;
+        int y_top;
+        int x_bottom;
+        int y_bottom;
+};
 
 bool is_cursor_in_x(const Region & region);
 
-void get_input(Camera2D & camera, const std::unordered_map<std::string, Region>& Regions);
+void get_input(Camera2D & camera, const std::unordered_map<std::string, Region>& Regions, Region_should_darken & region_should_darken);
 

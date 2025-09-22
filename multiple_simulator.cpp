@@ -3,14 +3,6 @@
 int height = 500;
 int width = 1000;
 
-struct Region_should_darken{
-	bool value = false;
-	int x_top;
-	int y_top;
-	int x_bottom;
-	int y_bottom;
-};
-
 Region_should_darken region_should_darken {
 	0,
 	0,
@@ -22,7 +14,7 @@ Region_should_darken region_should_darken {
 std::unordered_map<std::string, Region> Regions = {
         // {x_top, x_bottom, y_top, y_bottom}
         {"world", {200, 1321, 100, 500}},
-        {"place_component_prompt",{126, 160, 46, 26}},
+        {"place_component_prompt",{126, 160, 26, 46}},
         {"run_selector", {476, 548, 78, 100}},
         {"agilent_selector", {1340, 1362, 430, 452}},
         {"new_source", {46, 76, 216, 245}},
@@ -93,8 +85,14 @@ int main(){
 	std::vector<Node> nodes;
 	std::vector<Connection> connections;
 
+	resistors.push_back({100,500,EAST,1});
+	sources.push_back({100,600,WEST,1});
+	nodes.push_back({100,700,1});
+	connections.push_back({50,100,500,100});
+	
+
 	while(!WindowShouldClose()){
-		get_input(camera, Regions);
+		get_input(camera, Regions, region_should_darken);
 		BeginDrawing();
 
 		BeginMode2D(camera);
@@ -104,14 +102,22 @@ int main(){
 			DrawTexture(resistor_texture, resistor.x, resistor.y, WHITE);
 		}
 		for(auto source : sources){
-			DrawTexture(source_texture, source.x, source,y, WHITE);
+			DrawTexture(source_texture, source.x, source.y, WHITE);
 		}
 		for(auto node : nodes){
 			DrawCircle(node.x, node.y, 5, RED);
 		}
 		for(auto connection : connections){
 			DrawLineEx(
-				(Vector2){connection.start_x, connection.shart_y},(Vector2){connection.end_x, connection.end_y}, 2.5, RED);
+				(Vector2){
+				(float)connection.start_x, 
+				(float)connection.start_y},
+				(Vector2){
+				(float)connection.end_x, 
+				(float)connection.end_y}, 
+				1.5, 
+				RED
+			);
 		}
 
                 EndMode2D();
