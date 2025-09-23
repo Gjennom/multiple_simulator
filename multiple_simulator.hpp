@@ -233,7 +233,8 @@ inline std::vector<Connection> connections;
 
 bool is_cursor_in_x(const Region & region, const Vector2 & mouse);
 
+bool is_point_valid_node_connect(int x, int y);
+
 bool is_cursor_on_button(const Button & button, const Vector2 & mouse);
 
 void get_input(Camera2D & camera);
-
