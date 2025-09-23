@@ -125,6 +125,7 @@ enum Orientation{
 };
 
 struct Resistor{
+	std::string name;
 	int x; // center x of sprite
 	int y; // center y of sprite
 	Orientation orientation; 
@@ -132,10 +133,18 @@ struct Resistor{
 };
 
 struct Source{
+	std::string name;
 	int x; // center x of sprite
 	int y; // center y of sprite
 	Orientation orientation; // direction of positive terminal
 	float voltage;
+};
+
+struct DMM{
+	std::string name;
+	int x;
+	int y;
+	// no orientation ig
 };
 
 struct Node{
@@ -145,29 +154,86 @@ struct Node{
 };
 
 struct Connection{
-	int start_x;
-	int end_x;
-	int start_y;
-	int end_y;
+	int x_min;
+	int x_max;
+	int y_min;
+	int y_max;
 	float current;
 };
 
 struct Region{
-	int x_top;
-	int x_bottom;
-	int y_top;
-	int y_bottom;
+	int x_min;
+	int x_max;
+	int y_min;
+	int y_max;
 };
 
 struct Region_should_darken{
         bool value = false;
-        int x_top;
-        int y_top;
-        int x_bottom;
-        int y_bottom;
+        int x_min;
+        int y_min;
+        int x_max;
+        int y_max;
 };
 
-bool is_cursor_in_x(const Region & region);
+struct Button{
+	std::string name;
+	int x_min;
+	int x_max;
+	int y_min;
+	int y_max;
+	bool is_down;
+};
 
-void get_input(Camera2D & camera, const std::unordered_map<std::string, Region>& Regions, Region_should_darken & region_should_darken);
+inline int height = 500;
+inline int width = 1000;
+
+inline Region_should_darken region_should_darken {
+        0,
+        0,
+        0,
+        0,
+        0
+};
+
+inline std::unordered_map<std::string, Region> regions = {
+	// {x_top, x_bottom, y_top, y_bottom}
+        {"world", {200, 1321, 100, 500}},
+        {"place_component_prompt",{126, 160, 26, 46}},
+        {"run_selector", {476, 548, 78, 100}},
+        {"agilent_selector", {1340, 1362, 430, 452}},
+        {"new_source", {46, 76, 216, 245}},
+        {"new_resistor", {81, 111, 216, 245}}
+};
+
+inline std::vector<Button> buttons = {
+        // will contain all interactable buttons and components not in world
+        {"new_source", 46, 76, 216, 245, false},
+        {"new_resistor", 81, 111, 216, 245, false},
+        {"agilent_selector", 1340, 1362, 430, 452, false}
+};
+
+inline std::vector<Button> world_buttons = {
+	// will contain all interactable buttons in world
+};
+
+inline bool resistor_being_added = false;
+inline bool source_being_added = false;
+inline bool agilent_being_added = false;
+inline bool connetion_being_added = false;
+inline bool mouse_was_clicked = false;
+inline bool mouse_is_clicked = false;
+inline bool highlight_interactables = false;
+
+inline std::vector<Resistor> resistors;
+inline std::vector<Source> sources;
+inline std::vector<DMM> DMMs;
+inline std::vector<Node> nodes;
+inline std::vector<Connection> connections;
+
+bool is_cursor_in_x(const Region & region, const Vector2 & mouse);
+
+bool is_cursor_on_button(const Button & button, const Vector2 & mouse);
+
+void get_input(Camera2D & camera);
 

@@ -1,26 +1,5 @@
 #include "multiple_simulator.hpp"
 
-int height = 500;
-int width = 1000;
-
-Region_should_darken region_should_darken {
-	0,
-	0,
-	0,
-	0,
-	0
-};
-
-std::unordered_map<std::string, Region> Regions = {
-        // {x_top, x_bottom, y_top, y_bottom}
-        {"world", {200, 1321, 100, 500}},
-        {"place_component_prompt",{126, 160, 26, 46}},
-        {"run_selector", {476, 548, 78, 100}},
-        {"agilent_selector", {1340, 1362, 430, 452}},
-        {"new_source", {46, 76, 216, 245}},
-        {"new_resistor", {81, 111, 216, 245}}
-};
-
 int main(){
 
         // Getting dimensions for window
@@ -39,16 +18,23 @@ int main(){
         camera.zoom = 1.0f;
 	
 	// Loading resources;
-	// Multiple simulator front UI
+	// Multiple simulator front
+	Font arial = LoadFont("resources/arial.ttf");
 	Image mult_front = LoadImage("resources/multisim_main.png");
 	float ratio_x = (float)width / (float)mult_front.width;
 	float ratio_y = (float)height / (float)mult_front.height;
 	// Auto scaling button locations so they fit the resize
-	for(auto & pair : Regions){
-		pair.second.x_top *= ratio_x;
-		pair.second.x_bottom *= ratio_x;
-		pair.second.y_top *= ratio_y;
-		pair.second.y_bottom *= ratio_y;
+	for(auto & pair : regions){
+		pair.second.x_min *= ratio_x;
+		pair.second.x_max *= ratio_x;
+		pair.second.y_min *= ratio_y;
+		pair.second.y_max *= ratio_y;
+	}
+	for(auto & button : buttons){
+		button.x_min *= ratio_x;
+		button.x_max *= ratio_x;
+		button.y_min *= ratio_y;
+		button.y_max *= ratio_y;
 	}
 	ImageResize(&mult_front, width, height);
 	Texture2D mult_texture = LoadTextureFromImage(mult_front);
@@ -80,19 +66,10 @@ int main(){
 	UnloadImage(source);
 
 	// Creating vectors that will contain world component information
-	std::vector<Resistor> resistors;
-	std::vector<Source> sources;
-	std::vector<Node> nodes;
-	std::vector<Connection> connections;
-
-	resistors.push_back({100,500,EAST,1});
-	sources.push_back({100,600,WEST,1});
-	nodes.push_back({100,700,1});
-	connections.push_back({50,100,500,100});
-	
 
 	while(!WindowShouldClose()){
-		get_input(camera, Regions, region_should_darken);
+		get_input(camera);
+		Vector2 mouse = GetMousePosition();
 		BeginDrawing();
 
 		BeginMode2D(camera);
@@ -100,9 +77,14 @@ int main(){
                 DrawTexture(background_texture, 0, 0, WHITE);
 		for(auto resistor : resistors){
 			DrawTexture(resistor_texture, resistor.x, resistor.y, WHITE);
+			DrawTextEx(arial, resistor.name.c_str(), (Vector2){(float)resistor.x + 22, (float)resistor.y - 20}, 15.0, 2, BLACK);
 		}
 		for(auto source : sources){
 			DrawTexture(source_texture, source.x, source.y, WHITE);
+			DrawTextEx(arial, source.name.c_str(), (Vector2){(float)source.x - 25, (float)source.y + 16}, 15.0, 2, BLACK);
+		}
+		for(auto dmm : DMMs){
+			DrawTexture(agilent_component_texture, dmm.x, dmm.y, WHITE);
 		}
 		for(auto node : nodes){
 			DrawCircle(node.x, node.y, 5, RED);
@@ -110,33 +92,82 @@ int main(){
 		for(auto connection : connections){
 			DrawLineEx(
 				(Vector2){
-				(float)connection.start_x, 
-				(float)connection.start_y},
+				(float)connection.x_min, 
+				(float)connection.y_min},
 				(Vector2){
-				(float)connection.end_x, 
-				(float)connection.end_y}, 
+				(float)connection.x_max, 
+				(float)connection.y_max}, 
 				1.5, 
 				RED
 			);
 		}
+		if (highlight_interactables){
+                        for (auto button : world_buttons){
+                                DrawRectangle(
+                                        button.x_min,
+                                        button.y_min,
+                                        button.x_max - button.x_min,
+                                        button.y_max - button.y_min,
+                                        {
+                                                (unsigned char)255,
+                                                (unsigned char)255,
+                                                (unsigned char)0,
+                                                (unsigned char)100
+                                });
+                        }
+                }
 
                 EndMode2D();
 
 		DrawTexture(mult_texture, 0, 0, WHITE);
+		if (highlight_interactables){
+			for (auto button : buttons){
+				DrawRectangle(
+					button.x_min,
+					button.y_min,
+					button.x_max - button.x_min,
+					button.y_max - button.y_min,
+					{
+						(unsigned char)255,
+						(unsigned char)255,
+						(unsigned char)0,
+						(unsigned char)100			
+				});
+			}
+		}
 		if (region_should_darken.value){
-			DrawRectangle(region_should_darken.x_top,
-				region_should_darken.y_top,
-				region_should_darken.y_bottom - 
-				region_should_darken.y_top,
-				region_should_darken.x_bottom -
-				region_should_darken.x_top,
+			DrawRectangle(region_should_darken.x_min,
+				region_should_darken.y_min,
+				region_should_darken.y_max - 
+				region_should_darken.y_min,
+				region_should_darken.x_max -
+				region_should_darken.x_min,
 				{
 					(unsigned char)0,
 					(unsigned char)0,
 					(unsigned char)0,
 					(unsigned char)50
 				});
+			region_should_darken.value = false;
 		}
+		if (resistor_being_added) DrawTexture(
+			resistor_texture,
+			mouse.x,
+			mouse.y,
+			WHITE	
+		);
+		else if (source_being_added) DrawTexture(
+			source_texture,
+			mouse.x,
+			mouse.y,
+			WHITE	
+		);
+		else if (agilent_being_added) DrawTexture(
+			agilent_component_texture,
+			mouse.x,
+			mouse.y,
+			WHITE		
+		);
 		EndDrawing();
 	}
 
