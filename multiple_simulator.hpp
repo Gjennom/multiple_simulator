@@ -6,6 +6,7 @@
 #include "raymath.h"
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include <unordered_map>
 
 /*	This program will use raylib to implement circuits in a 
@@ -108,14 +109,20 @@
  *
  */
 
-/*
-int resistor_width = 60;
-int resistor_height = 12;
-int source_width = 36;
-int source_height = 48;
-int node_radius = 5;
-int connector_width = 2;
-*/
+struct Connection_points{
+        //  c1 is + terminal for sources
+        int c1_x;
+        int c1_y;
+        //  c2 is - terminal for sources
+        int c2_x;
+        int c2_y;
+        int c3_x;
+        int c3_y;
+        int c4_x;
+        int c4_y;
+        int c5_x;
+        int c5_y;
+};
 
 enum Orientation{
 	NORTH,
@@ -130,6 +137,7 @@ struct Resistor{
 	int y; // center y of sprite
 	Orientation orientation; 
 	float resistance;
+	Connection_points connections;
 };
 
 struct Source{
@@ -138,6 +146,7 @@ struct Source{
 	int y; // center y of sprite
 	Orientation orientation; // direction of positive terminal
 	float voltage;
+	Connection_points connections;
 };
 
 struct DMM{
@@ -145,12 +154,14 @@ struct DMM{
 	int x;
 	int y;
 	// no orientation ig
+	Connection_points connections;
 };
 
 struct Node{
 	int x;
 	int y;
 	float voltage;
+	Connection_points connections;
 };
 
 struct Connection{
@@ -159,6 +170,7 @@ struct Connection{
 	int y_min;
 	int y_max;
 	float current;
+	Connection_points connections;
 };
 
 struct Region{
@@ -183,6 +195,19 @@ struct Button{
 	int y_min;
 	int y_max;
 	bool is_down;
+};
+
+inline Connection_points  default_connection = {
+	0, 
+	0, 
+	0, 
+	0, 
+	0, 
+	0, 
+	0, 
+	0, 
+	0, 
+	0
 };
 
 inline int height = 500;
@@ -224,12 +249,17 @@ inline bool connetion_being_added = false;
 inline bool mouse_was_clicked = false;
 inline bool mouse_is_clicked = false;
 inline bool highlight_interactables = false;
+inline bool highlight_connections = false;
+inline bool connect_mode = false;
+inline bool tracing_connection = false;
+inline Vector2 mouse_world_pos = (Vector2){0, 0};
+inline Vector2 mouse_pos = (Vector2){0, 0};
 
 inline std::vector<Resistor> resistors;
 inline std::vector<Source> sources;
 inline std::vector<DMM> DMMs;
 inline std::vector<Node> nodes;
-inline std::vector<Connection> connections;
+inline std::vector<std::vector<Connection>> connections;
 
 bool is_cursor_in_x(const Region & region, const Vector2 & mouse);
 
@@ -237,4 +267,22 @@ bool is_point_valid_node_connect(int x, int y);
 
 bool is_cursor_on_button(const Button & button, const Vector2 & mouse);
 
+void update_resistor_connections(Resistor & resistor);
+
+void update_source_connections(Source & source);
+
+void update_dmm_connections(DMM & dmm);
+
 void get_input(Camera2D & camera);
+
+Vector2 nearest_grid_point();
+
+Vector2 nearest_grid_input(Vector2 position);
+
+void connect();
+
+void larger_connection();
+
+void highlight_connection();
+
+void update_connection_connections(std::vector<Connection> & connection);

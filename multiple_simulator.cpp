@@ -69,11 +69,12 @@ int main(){
 
 	while(!WindowShouldClose()){
 		get_input(camera);
-		Vector2 mouse = GetMousePosition();
+		mouse_pos = GetMousePosition();
 		BeginDrawing();
 
 		BeginMode2D(camera);
                 ClearBackground(GRAY);
+		mouse_world_pos = GetScreenToWorld2D(GetMousePosition(), camera);
                 DrawTexture(background_texture, 0, 0, WHITE);
 		for(auto resistor : resistors){
 			DrawTexture(resistor_texture, resistor.x, resistor.y, WHITE);
@@ -90,17 +91,18 @@ int main(){
 			DrawCircle(node.x, node.y, 5, RED);
 		}
 		for(auto connection : connections){
-			DrawLineEx(
-				(Vector2){
-				(float)connection.x_min, 
-				(float)connection.y_min},
-				(Vector2){
-				(float)connection.x_max, 
-				(float)connection.y_max}, 
-				1.5, 
-				RED
-			);
-		}
+			for(auto sub_con : connection)
+				DrawLineEx(
+					(Vector2){
+					(float)sub_con.x_min, 
+					(float)sub_con.y_min},
+					(Vector2){
+					(float)sub_con.x_max, 
+					(float)sub_con.y_max}, 
+					1.5, 
+					RED
+				);
+			}
 		if (highlight_interactables){
                         for (auto button : world_buttons){
                                 DrawRectangle(
@@ -116,6 +118,9 @@ int main(){
                                 });
                         }
                 }
+		if (highlight_connections){
+			highlight_connection();
+		}
 
                 EndMode2D();
 
@@ -148,26 +153,27 @@ int main(){
 					(unsigned char)0,
 					(unsigned char)50
 				});
-			region_should_darken.value = false;
+		region_should_darken.value = false;
 		}
 		if (resistor_being_added) DrawTexture(
 			resistor_texture,
-			mouse.x,
-			mouse.y,
+			mouse_pos.x,
+			mouse_pos.y,
 			WHITE	
 		);
 		else if (source_being_added) DrawTexture(
 			source_texture,
-			mouse.x,
-			mouse.y,
+			mouse_pos.x,
+			mouse_pos.y,
 			WHITE	
 		);
 		else if (agilent_being_added) DrawTexture(
 			agilent_component_texture,
-			mouse.x,
-			mouse.y,
+			mouse_pos.x,
+			mouse_pos.y,
 			WHITE		
 		);
+		if (connect_mode) DrawCircle(mouse_pos.x, mouse_pos.y, 5, RED);
 		EndDrawing();
 	}
 
